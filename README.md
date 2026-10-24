@@ -56,7 +56,7 @@ EFI
 ```
 
 > **Note**
-> `EFI/BOOT/BOOTx64.efi` is not included. Copy it from the matching [OpenCorePkg](https://github.com/acidanthera/OpenCorePkg) build.
+> `EFI/BOOT/BOOTx64.efi` is from the matching Dortania OpenCorePkg 1.0.9 build. Download the repo as ZIP (**Code → Download ZIP**) and copy the `EFI` folder to your USB / EFI partition.
 
 ---
 
