@@ -1,45 +1,81 @@
+<div align="center">
+
 # ASUS ROG Strix G15 G513QC — OpenCore EFI
 
-> OpenCore EFI for running **macOS Sequoia 15.8.1** on the ASUS ROG Strix G15 (G513QC), Ryzen 7 5800H + Radeon iGPU.
+**macOS Sequoia on AMD Ryzen 7 5800H + Radeon iGPU**
 
-| | |
-|---|---|
-| **macOS** | Sequoia 15.8.1 (24H32) |
-| **OpenCore** | 1.0.9 (REL-109-2026-10-21, Dortania nightly) |
-| **SMBIOS** | MacBookPro16,2 |
-| **Boot picker** | OpenCanopy — `Acidanthera\GoldenGate` |
-| **Last updated** | 2026-10-24 |
+![macOS](https://img.shields.io/badge/macOS-Sequoia_15.8.1-000000?style=for-the-badge&logo=apple&logoColor=white)
+![OpenCore](https://img.shields.io/badge/OpenCore-1.0.9-0A84FF?style=for-the-badge)
+![CPU](https://img.shields.io/badge/CPU-Ryzen_7_5800H-ED1C24?style=for-the-badge&logo=amd&logoColor=white)
+![GPU](https://img.shields.io/badge/iGPU-NootedRed-ED1C24?style=for-the-badge)
+![SMBIOS](https://img.shields.io/badge/SMBIOS-MacBookPro16%2C2-555555?style=for-the-badge)
 
-> **Warning**
-> SMBIOS is **redacted**. Generate your own values before booting — see [SMBIOS](#smbios).
+![Status](https://img.shields.io/badge/status-daily_usable_on_AC-brightgreen?style=flat-square)
+![Updated](https://img.shields.io/badge/updated-2026--10--29-blue?style=flat-square)
 
-> **Critical**
-> System **freezes on battery power** — also happens in **Windows**, so it is not caused by macOS/OpenCore. This is a **known issue on the 2021 AMD G513 series** (G513QE / QM / QY reports on the ROG forum). Use on **AC power**. See [Known issues](#known-issues).
+</div>
+
+> [!WARNING]
+> **SMBIOS is redacted.** Generate your own Serial, MLB, SystemUUID and ROM before booting — see [SMBIOS](#-smbios).
+
+> [!CAUTION]
+> **The system freezes on battery power** — this also happens in Windows and is a known issue on the 2021 AMD G513 series, not an OpenCore problem. Use on **AC power**.
 
 ---
 
-## Hardware
+## 📑 Contents
+
+- [Overview](#-overview)
+- [Hardware status](#-hardware-status)
+- [EFI structure](#-efi-structure)
+- [Configuration](#%EF%B8%8F-configuration)
+- [Hidden BIOS settings](#-hidden-bios-settings)
+- [SMBIOS](#-smbios)
+- [Installation](#-installation)
+- [Known issues](#-known-issues)
+- [Credits](#-credits)
+
+---
+
+## 🧾 Overview
+
+| Item | Value |
+|---|---|
+| Laptop | ASUS ROG Strix G15 **G513QC** (BIOS G513QC.335) |
+| CPU | AMD Ryzen 7 5800H (8C / 16T) |
+| iGPU | AMD Radeon (Cezanne) — **4 GB UMA** |
+| dGPU | NVIDIA RTX 3050 Laptop — *unsupported* |
+| RAM | 32 GB |
+| Wi-Fi / BT | Intel AX200 |
+| macOS | Sequoia 15.8.1 (24H32) |
+| OpenCore | 1.0.9 (REL-109-2026-10-21, Dortania build) |
+| Boot picker | OpenCanopy — `Acidanthera\GoldenGate` |
+
+---
+
+## ✅ Hardware status
 
 | Component | Model | Status | Notes |
 |---|---|:---:|---|
-| CPU | AMD Ryzen 7 5800H | ✅ | ForgedInvariant |
-| iGPU | AMD Radeon (Cezanne) | ✅ | NootedRed, Metal 3, 1080p 144 Hz, **4 GB VRAM** (UMA) |
-| dGPU | NVIDIA RTX 3050 Laptop | ❌ | No macOS driver |
-| Audio | Realtek ALC294 | ✅ | AppleALC, layout **66** |
+| CPU | Ryzen 7 5800H | ✅ | AMD Vanilla patches, ForgedInvariant |
+| iGPU | Radeon (Cezanne) | ✅ | NootedRed, Metal 3, 1080p 144 Hz, 4 GB VRAM |
+| dGPU | RTX 3050 Laptop | ❌ | No macOS driver |
+| Audio | Realtek ALC294 | ✅ | AppleALC layout **66** |
 | Wi-Fi | Intel AX200 | ✅ | AirportItlwm |
-| Bluetooth | Intel AX200 | ✅ | Pairs & streams audio (needs UTBMap, SBC codec) — tested BT speaker |
+| Bluetooth | Intel AX200 | ✅ | Pairs & streams (UTBMap + SBC codec) |
+| Ethernet | Realtek RTL8111 | ✅ | RealtekRTL8111 |
 | Keyboard | PS/2 (N-KEY) | ✅ | VoodooPS2 — Alt = ⌘, Win = ⌥ |
 | Trackpad | I2C HID | ✅ | VoodooI2C |
 | USB | 2× USB-A, 1× USB-C | ✅ | Custom `UTBMap.kext` |
-| HDMI | — | ✅ | Tested LG 23MP75 1080p 60 Hz · Samsung Odyssey G50D 2560×1440 144 Hz |
+| HDMI | — | ✅ | 1080p 60 Hz, 1440p 144 Hz tested |
 | Brightness | — | ✅ | SSDT-PNLF + BrightnessKeys |
-| Battery | — | ⚠️ | Detected/charges; **freezes on battery** (known G513 issue, also in Windows) |
+| Battery | — | ⚠️ | Reads & charges; freezes on battery |
 | Webcam | — | ➖ | Not present on this model |
-| Continuity / AirDrop | — | ❌ | Requires Broadcom Wi-Fi card |
+| Continuity / AirDrop / Instant Hotspot / iPhone Mirroring | — | ❌ | Requires a Broadcom Wi-Fi card |
 
 ---
 
-## EFI structure
+## 📁 EFI structure
 
 ```text
 EFI
@@ -50,17 +86,16 @@ EFI
     ├── Drivers
     ├── Kexts
     ├── Resources
-    ├── Tools
     ├── OpenCore.efi
     └── config.plist
 ```
 
-> **Note**
-> `EFI/BOOT/BOOTx64.efi` is from the matching Dortania OpenCorePkg 1.0.9 build. Download the repo as ZIP (**Code → Download ZIP**) and copy the `EFI` folder to your USB / EFI partition.
+> [!NOTE]
+> Download with **Code → Download ZIP** and copy the `EFI` folder to your USB stick or EFI partition.
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
 ### Boot-args
 
@@ -70,13 +105,14 @@ EFI
 
 | Arg | Purpose |
 |---|---|
-| `-v debug=0x100 keepsyms=1` | Verbose boot + debug (kept on — removing caused black screen) |
-| `-vi2c-force-polling` | VoodooI2C polling mode for trackpad |
+| `-v debug=0x100 keepsyms=1` | Verbose boot + debugging (kept — removing caused a black screen) |
+| `-vi2c-force-polling` | VoodooI2C polling mode for the trackpad |
 | `npci=0x3000` | PCI configuration fix |
-| `-NRedDPDelay` | NootedRed display link delay |
+| `-NRedDPDelay` | NootedRed display-link delay |
 | `alcid=66` | Audio layout for ALC294 |
 
-### Kexts
+<details>
+<summary><b>Kexts</b></summary>
 
 | Category | Kexts |
 |---|---|
@@ -90,41 +126,48 @@ EFI
 | Input | VoodooPS2Controller, VoodooI2C, VoodooI2CHID, BrightnessKeys |
 | Storage | NVMeFix |
 
-### UEFI drivers
+</details>
 
-`HfsPlus.efi` · `OpenRuntime.efi` · `ResetNvramEntry.efi` · `OpenCanopy.efi`
+<details>
+<summary><b>UEFI drivers & ACPI</b></summary>
 
-### ACPI
+**Drivers:** `HfsPlus.efi` · `OpenRuntime.efi` · `ResetNvramEntry.efi` · `OpenCanopy.efi`
 
-`SSDT-ALS0` · `SSDT-EC` · `SSDT-PLUG-ALT` · `SSDT-PNLF` · `SSDT-USB-Reset` · `SSDT-USBX` · `SSDT-XOSI`
+**ACPI:** `SSDT-ALS0` · `SSDT-EC` · `SSDT-PLUG-ALT` · `SSDT-PNLF` · `SSDT-USB-Reset` · `SSDT-USBX` · `SSDT-XOSI`
 
-### Key settings
+</details>
+
+<details>
+<summary><b>Key settings</b></summary>
 
 | Setting | Value | Reason |
 |---|---|---|
 | `Misc > Boot > PickerMode` | `External` | OpenCanopy GUI |
-| `Misc > Boot > PickerAttributes` | `145` | Icons + mouse + flavour icons |
+| `Misc > Boot > PickerAttributes` | `145` | Icons, mouse, flavour icons |
 | `Misc > Boot > LauncherOption` | `Full` | Boot entry on internal disk |
 | `Misc > Boot > HideAuxiliary` | `false` | Show Recovery / Reset NVRAM |
 | `SSDT-Disable_GPU_GPP0` | Disabled | Powering off dGPU resets at *PCI configuration begin* |
 
+</details>
+
 ---
 
-## Hidden BIOS settings
+## 🔧 Hidden BIOS settings
 
-Changed with [Smokeless_UMAF](https://github.com/DavidS95/Smokeless_UMAF) (`UniversalAMDFormBrowser`, booted from FAT32 USB) on BIOS **G513QC.335**. Use at your own risk.
+Changed with [Smokeless_UMAF](https://github.com/DavidS95/Smokeless_UMAF) (`UniversalAMDFormBrowser`, booted from a FAT32 USB stick).
 
 | Path | Setting | Value | Why |
 |---|---|---|---|
-| Device Manager → AMD CBS → NBIO Common Options → GFX Configuration | iGPU Configuration | `UMA_SPECIFIED` | Unlock frame buffer size |
-| | UMA Frame buffer Size | `4G` | Default 512 MB causes screen corruption / GPU hangs (32 GB RAM system) |
-| Device Manager → AMD CBS → CPU Common Options | Global C-state Control | `Disabled` | Idle kernel panic (cores not waking) |
+| AMD CBS → NBIO Common Options → GFX Configuration | iGPU Configuration | `UMA_SPECIFIED` | Unlocks frame buffer size |
+| | UMA Frame buffer Size | `4G` | 512 MB default causes screen corruption / GPU hangs |
+| AMD CBS → CPU Common Options | Global C-state Control | `Disabled` | Idle kernel panic (cores not waking) |
 
-Recovery: BIOS (F2) → F9 → F10, or unplug AC and hold power 40 s.
+> [!CAUTION]
+> Change only these settings. Recovery: BIOS (**F2**) → **F9** → **F10**, or unplug AC and hold power for 40 s.
 
 ---
 
-## SMBIOS
+## 🔑 SMBIOS
 
 1. Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS).
 2. Generate for **MacBookPro16,2**.
@@ -135,44 +178,54 @@ Recovery: BIOS (F2) → F9 → F10, or unplug AC and hold power 40 s.
 | `SystemSerialNumber` | `REPLACE_WITH_YOUR_SERIAL` |
 | `MLB` | `REPLACE_WITH_YOUR_MLB` |
 | `SystemUUID` | `00000000-0000-0000-0000-000000000000` |
-| `ROM` | `000000000000` → use your NIC MAC address |
+| `ROM` | `000000000000` → your NIC MAC address |
 
 ---
 
-## Installation
+## 🚀 Installation
 
-1. Format a USB stick as FAT32 (GUID).
+1. Format a USB stick as **FAT32 (GUID)**.
 2. Copy `EFI` to the USB root and add the macOS recovery.
 3. Fill in SMBIOS.
-4. Boot from USB → install macOS → first boot can take 15–20 min on a grey screen.
-5. Copy `EFI/OC` to the internal EFI partition (keep `Microsoft` / `Boot` folders if dual-booting).
-6. In Windows (admin):
+4. Boot from USB → install macOS. *The first boot can sit on a grey screen for 15–20 minutes.*
+5. Copy `EFI/OC` to the internal EFI partition (keep `Microsoft` / `Boot` if dual-booting).
+6. Add a boot entry from Windows (admin Command Prompt):
 
 ```cmd
 bcdedit /copy {bootmgr} /d "OpenCore"
 bcdedit /set {GUID} path \EFI\OC\OpenCore.efi
 ```
 
-7. BIOS (F2) → move **OpenCore** to first boot priority.
+7. BIOS (**F2**) → move **OpenCore** to first boot priority.
 
 ---
 
-## Known issues
+## ⚠️ Known issues
+
+### 🔴 Critical
 
 | Issue | Workaround |
 |---|---|
-| 🔴 **System freeze on battery** (macOS **and** Windows) | Known G513 (2021, AMD) issue, no official fix. Reported causes: Silent/battery power profile underclocking the CPU, GPU switching, high temps. Use AC power; set **Performance** mode with the fan key (not Silent) in Windows; update BIOS; clean fans. Battery replacement did **not** fix it for some owners |
-| 🔴 **Kernel panic at idle** — screen freezes, pointer still moves (`mp_cpus_call_wait() timeout`, 14/16 CPUs no ACK) | AMD Vanilla patches verified (8 cores, `ProvideCurrentCpuInfo`, ForgedInvariant). **Global C-state Control → Disabled** via Smokeless_UMAF (see [Hidden BIOS settings](#hidden-bios-settings)) + `sudo pmset -a tcpkeepalive 0 womp 0 powernap 0`. *Under test.* |
-| Bluetooth audio drops 1–2 s | Force SBC: `sudo defaults write bluetoothaudiod "Enable AAC codec" -bool false` and `"Enable AptX codec" -bool false`. Apple Music: **Lossless off**, **Dolby Atmos off** (downloaded songs & YouTube play clean on Wi-Fi and Ethernet) |
-| Bluetooth won't connect | Map the Intel BT USB port as internal (`UsbConnector 255`) in UTBMap.kext |
-| Screen corruption in Chromium/Electron apps | Main fix: 4 GB VRAM (see [Hidden BIOS settings](#hidden-bios-settings)). Fallback: `open -a <App> --args --disable-gpu --disable-gpu-compositing` |
+| **Freeze on battery** (macOS **and** Windows) | Known 2021 AMD G513 issue, no official fix. Use AC power; Performance mode (fan key) in Windows; update BIOS; clean fans. A new battery did **not** fix it for some owners. |
+| **Kernel panic at idle** — screen freezes, pointer moves (`mp_cpus_call_wait() timeout`) | AMD patches verified. **Global C-state Control → Disabled** + `sudo pmset -a tcpkeepalive 0 womp 0 powernap 0`. *Under test.* |
+
+### 🟡 Workarounds
+
+| Issue | Workaround |
+|---|---|
+| Bluetooth won't connect | Map the Intel BT port as internal (`UsbConnector 255`) in UTBMap |
+| Bluetooth audio drops 1–2 s | Force SBC (`bluetoothaudiod` AAC/AptX → `false`); Apple Music: Lossless **off**, Dolby Atmos **off** |
+| Screen corruption in Chromium/Electron apps | Fixed by 4 GB VRAM. Fallback: `open -a <App> --args --disable-gpu --disable-gpu-compositing` |
+| YouTube laggy in Safari | Likely software VP9 decode. Use 720p/1080p without 60 fps, or Chrome + **enhanced-h264ify** |
+| iPhone hotspot won't connect | Instant Hotspot unsupported. iPhone → Personal Hotspot → **Maximize Compatibility ON**, join as WPA2 Personal — or use **USB tethering** |
 | UI glitches / random black screen | Reduce transparency, 60 Hz, disable auto-brightness |
-| iGPU VRAM only 512 MB | ✅ Raised to 4 GB via Smokeless_UMAF (see [Hidden BIOS settings](#hidden-bios-settings)) |
 | External display flickers on connect | Normal — stabilises in seconds |
-| No fan / performance control | Set mode in Windows (G-Helper); EC handles fans |
+| No fan / performance control | Set the mode in Windows (G-Helper); the EC handles fans |
 
 ---
 
-## Credits
+## 🙏 Credits
 
-[Acidanthera](https://github.com/acidanthera) · [ChefKiss — NootedRed](https://github.com/ChefKissInc/NootedRed) · [OpenIntelWireless](https://github.com/OpenIntelWireless) · [VoodooI2C](https://github.com/VoodooI2C) · [USBToolBox](https://github.com/USBToolBox) · [OpCore Simplify](https://github.com/lzhoang2801/OpCore-Simplify) · [Dortania](https://dortania.github.io)
+[Acidanthera](https://github.com/acidanthera) · [ChefKiss — NootedRed](https://github.com/ChefKissInc/NootedRed) · [OpenIntelWireless](https://github.com/OpenIntelWireless) · [VoodooI2C](https://github.com/VoodooI2C) · [USBToolBox](https://github.com/USBToolBox) · [OpCore Simplify](https://github.com/lzhoang2801/OpCore-Simplify) · [Smokeless_UMAF](https://github.com/DavidS95/Smokeless_UMAF) · [Dortania](https://dortania.github.io)
+
+<div align="center"><sub>Use at your own risk. Not affiliated with Apple or ASUS.</sub></div>
