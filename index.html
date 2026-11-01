@@ -4,11 +4,47 @@
   <meta charset="UTF-8">
   <title>G513QC OpenCore EFI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/themes/vue.css">
+  <meta name="color-scheme" content="light dark">
+  <link rel="stylesheet" id="theme-light" media="(prefers-color-scheme: light)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0.9.0/dist/css/theme-simple.css">
+  <link rel="stylesheet" id="theme-dark" media="(prefers-color-scheme: dark)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0.9.0/dist/css/theme-simple-dark.css">
+  <style>
+    :root { --base-font-size: 15px; --content-max-width: 60em; }
+    .markdown-section table { display: table; width: 100%; }
+    #theme-toggle {
+      position: fixed; top: 12px; right: 64px; z-index: 50;
+      border: 1px solid rgba(128,128,128,.4); border-radius: 8px;
+      background: transparent; color: inherit; font: inherit; font-size: 13px;
+      padding: 4px 10px; cursor: pointer;
+    }
+    #theme-toggle:hover { border-color: rgba(128,128,128,.8); }
+  </style>
 </head>
 <body>
+  <button id="theme-toggle" type="button" title="Theme: follow system / light / dark">Auto</button>
   <div id="app"></div>
   <script>
+    (function () {
+      var light = document.getElementById('theme-light');
+      var dark = document.getElementById('theme-dark');
+      var btn = document.getElementById('theme-toggle');
+      var modes = ['auto', 'light', 'dark'];
+      var labels = { auto: 'Auto', light: '☀ Light', dark: '☾ Dark' };
+      function apply(mode) {
+        if (mode === 'light') { light.media = 'all'; dark.media = 'not all'; }
+        else if (mode === 'dark') { light.media = 'not all'; dark.media = 'all'; }
+        else { light.media = '(prefers-color-scheme: light)'; dark.media = '(prefers-color-scheme: dark)'; }
+        btn.textContent = labels[mode];
+      }
+      var mode = 'auto';
+      try { mode = localStorage.getItem('theme-mode') || 'auto'; } catch (e) {}
+      if (modes.indexOf(mode) < 0) mode = 'auto';
+      apply(mode);
+      btn.addEventListener('click', function () {
+        mode = modes[(modes.indexOf(mode) + 1) % modes.length];
+        apply(mode);
+        try { localStorage.setItem('theme-mode', mode); } catch (e) {}
+      });
+    })();
     window.$docsify = {
       name: 'G513QC OpenCore EFI',
       repo: 'AMOLEDArekkusu/ROG-Strix-G513QC-Hackintosh',
@@ -19,6 +55,7 @@
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/docsify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0.9.0/dist/js/docsify-themeable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/plugins/search.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2.1.1/dist/docsify-copy-code.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify-plugin-flexible-alerts@1.1.1/dist/docsify-plugin-flexible-alerts.min.js"></script>
